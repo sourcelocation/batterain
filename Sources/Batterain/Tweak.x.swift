@@ -3,13 +3,9 @@ import BatterainC
 import UIKit
 import os
 
-@objc protocol _UIBatteryViewPrivate {
-    var chargePercent: CGFloat { get }
-}
 
-class _UIBatteryViewHook: ClassHook<UIView> {
-    static var targetName: String = "_UIBatteryView"
-    
+class _UIBatteryViewHook: ClassHook<_UIBatteryView> { // _UIBatteryView is in Tweak.h
+
     func fillColor() -> UIColor {
         return color()
     }
@@ -17,9 +13,15 @@ class _UIBatteryViewHook: ClassHook<UIView> {
         return color()
     }
     func boltColor() -> UIColor {
-        return .green
+        return .white
     }
-    
+
+    func setChargePercent(_ percent: Double) {
+        orig.setChargePercent(percent)
+        target._updateBatteryFillColor()
+        target._updateBodyColors()
+    }
+
     // Private function are just helper function. The above ones are overrides.
     private func color() -> UIColor {
         let percentage = percentage()
@@ -30,9 +32,7 @@ class _UIBatteryViewHook: ClassHook<UIView> {
         }
     }
     private func percentage() -> Double {
-        let converted = target.as(interface: _UIBatteryViewPrivate.self)
-        
-        return converted.chargePercent
+        return target.chargePercent()
     }
 }
 
